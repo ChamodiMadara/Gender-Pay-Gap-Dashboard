@@ -68,7 +68,7 @@ You can view the live dashboard here:
 
 Here’s an overview of the dashboard:
 
-![Dashboard Overview](screenshots/dashboard_overview.png)
+![Dashboard Overview](dashboard_overview.png)
 
 
 
