@@ -1,0 +1,192 @@
+---
+title: "Assignment 2"
+author: "Chamodi Madara (3976064)"
+subtitle: Deconstruct, Reconstruct Web Report
+output:
+  pdf_document: 
+    fig_crop: no
+  html_document: default
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+# Do not change these settings!
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+### Assessment declaration checklist
+
+Please carefully read the statements below and check each box if you agree with the declaration. If you do not check all boxes, your assignment will not be marked. If you make a false declaration on any of these points, you may be investigated for academic misconduct. Students found to have breached academic integrity may receive official warnings and/or serious academic penalties. Please read more about academic integrity [here](https://www.rmit.edu.au/students/student-essentials/assessment-and-exams/academic-integrity). If you are unsure about any of these points or feel your assessment might breach academic integrity, please contact your course coordinator for support. It is important that you DO NOT submit any assessment until you can complete the declaration truthfully. 
+
+**By checking the boxes below, I declare the following:**
+
+- <input type="checkbox" id="dec1" name="dec1" value="Agree"> I have not impersonated, or allowed myself to be impersonated by, any person for the purposes of this assessment 
+
+- <input type="checkbox" id="dec2" name="dec2" value="Agree"> This assessment is my original work and no part of it has been copied from any other source except where due acknowledgement is made.
+
+- <input type="checkbox" id="dec3" name="dec3" value="Agree"> No part of this assessment has been written for me by any other person except where such collaboration has been authorised by the lecturer/teacher concerned.
+
+- <input type="checkbox" id="dec4" name="dec4" value="Agree"> Where this work is being submitted for individual assessment, I declare that it is my original work and that no part has been contributed by, produced by or in conjunction with another student.
+
+- <input type="checkbox" id="dec5" name="dec5" value="Agree"> I give permission for my assessment response to be reproduced, communicated compared and archived for the purposes of detecting plagiarism.
+
+- <input type="checkbox" id="dec6" name="dec6" value="Agree"> I give permission for a copy of my assessment to be retained by the university for review and comparison, including review by external examiners.
+
+**I understand that:**
+
+- <input type="checkbox" id="dec7" name="dec7" value="Agree"> Plagiarism is the presentation of the work, idea or creation of another person as though it is your own. It is a form of cheating and is a very serious academic offence that may lead to exclusion from the University. Plagiarised material can be drawn from, and presented in, written, graphic and visual form, including electronic data and oral presentations. Plagiarism occurs when the origin of the material used is not appropriately cited.
+
+- <input type="checkbox" id="dec8" name="dec8" value="Agree"> Plagiarism includes the act of assisting or allowing another person to plagiarise or to copy my work.
+
+**I agree and acknowledge that:**
+
+- <input type="checkbox" id="dec9" name="dec9" value="Agree"> I have read and understood the Declaration and Statement of Authorship above.
+
+- <input type="checkbox" id="dec10" name="dec10" value="Agree"> If I do not agree to the Declaration and Statement of Authorship in this context and all boxes are not checked, the assessment outcome is not valid for assessment purposes and will not be included in my final result for this course.
+
+
+**This is a template file. The following example included is not considered a good example to follow for Assignment 2. Remove this warning prior to submitting.** 
+
+## Deconstruct
+
+### Original
+
+The original data visualisation selected for the assignment was as follows:
+
+<br>
+<center>
+<img src="men-vs-women-comparing-income-by-industry-5134.jpg" width="80%">
+</center>
+<center>*Source: ACMA Research and Analysis Section (2015).*</center>
+<br>
+
+
+### Objective and Audience
+
+The objective and audience of the original data visualisation chosen can be summarised as follows: 
+
+**Objective**
+The primary objective of the visualization is to highlight wage disparities between genders across 20 distinct industries for the civilian employed population aged 16 and older in the U.S. for the year 2019. This visualization not only confirms the existence of a gender wage gap but also underscores the varied extent of this disparity across sectors. Additionally, it showcases the median earnings for both men and women in each industry, providing a holistic view of wage structures
+
+**Audience**
+The original data visualization, emphasizing the gender pay gap across U.S. industries, targets a diverse audience. This encompasses
+*gender equality champions
+*economic analysts
+*governmental policy makers
+*business leaders, the academic sphere
+*Feminist and Women's Rights Organizations
+*the general Public (who curious about socio-economic trends)
+*labor unions
+*media professionals
+This comprehensive visualization serves not only as an educational tool but also as a catalyst for societal and economic transformation 
+### Critique
+
+The visualisation chosen had the following three main issues:
+
+1.Ambiguity in Data Timeframe : The title 'Men vs. Women: Comparing Income by Industry' lacks a specific reference to the year of the data. Given that this visualization is derived from the US Census Bureau's 2019 data, omitting the year could potentially mislead the audience or create ambiguity about the timeframe of the information presented.
+
+2.
+
+
+## Reconstruct
+
+### Code
+
+The following code was used to fix the issues identified in the original. 
+
+```{r}
+library(readr)
+library(xlsx)
+library(readxl)
+library(openxlsx)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+setwd("C:/Users/ASUS/Downloads")
+Gender_wadge_gap <- read_csv("ACSST1Y2019.S2413-2023-09-15T024224.csv")
+
+colnames(Gender_wadge_gap) <- c("Industry", "Male_Wage", "Female_Wage", 
+                                "Women's earnings as a percentage of men's earning",
+                                "Group", "Gap_between_gender")
+
+Gender_wadge_gap$Group <- as.factor(Gender_wadge_gap$Group)
+
+# Removing the % signs and converting to numeric
+Gender_wadge_gap$Gap_between_gender <- as.numeric(sub("%", "", Gender_wadge_gap$Gap_between_gender))
+Gender_wadge_gap$`Women's earnings as a percentage of men's earning` <- as.numeric(sub("%", "", Gender_wadge_gap$`Women's earnings as a percentage of men's earning`))
+
+# Reorder the Industry factor levels based on Gap_between_gender values
+Gender_wadge_gap$Industry <- with(Gender_wadge_gap, reorder(Industry, -Gap_between_gender))
+
+p <- ggplot(Gender_wadge_gap, aes(x = Industry, y = Gap_between_gender, fill = Group)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label=sprintf("%.2f%%", Gap_between_gender)), 
+            hjust = 0, vjust=0.5) +   
+  coord_flip() +
+  labs(title = "Horizontal Bar Chart using ggplot2",
+       y = "Category",
+       x = "Value") +
+  theme_minimal() +
+  scale_fill_brewer(palette="Dark2", name=NULL) +  # Set legend title to NULL
+  theme(axis.text.y = element_text(size = rel(1.1), face = "bold"),
+        legend.position = "bottom",
+        legend.box = "horizontal") +
+  guides(fill=guide_legend(nrow=2, ncol=3))
+
+# Reshape data from wide to long format
+long_data <- Gender_wadge_gap %>%
+  pivot_longer(cols = c(Male_Wage, Female_Wage), 
+               names_to = "Gender", 
+               values_to = "Wage")
+
+# Adjust the values in the Gender column for better labeling and color mapping
+long_data$Gender <- ifelse(long_data$Gender == "Male_Wage", "Male", "Female")
+
+# Plotting
+plot <- ggplot(long_data, aes(x = Industry, y = Wage, fill = Gender)) +
+  
+  # Plot the bars
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.8) +
+  
+  # Labeling the bars with wage values formatted to two decimal places and appended with 'k'
+  geom_text(aes(label = sprintf("%.2fk", Wage/1000), group = Gender), 
+            position = position_dodge(width = 0.8), 
+            hjust = -0.1, vjust = 0.5, size = 3) +
+  
+  coord_flip() +
+  labs(title = "Horizontal Bar Chart showing Male and Female Wages",
+       y = "Industry",
+       x = "Wage") +
+  
+  theme_minimal() +
+  
+  # Manual color assignment
+  scale_fill_manual(values = c("Male" = "#007acc", "Female" = "#ff1ab3")) +  
+  
+  theme(axis.text.y = element_text(size = rel(1.1), face = "bold"),
+        legend.position = "bottom",
+        legend.box = "horizontal") +
+  guides(fill=guide_legend(nrow=1, ncol=2))
+
+
+```
+
+
+### Reconstruction
+
+The following plot fixes the main issues in the original.
+
+```{r fig.align="center", echo = FALSE}
+p
+
+```
+```{r}
+print(plot)
+```
+
+## References
+
+The reference to the original data visualisation choose, the data source(s) used for the reconstruction and any other sources used for this assignment are as follows:
+
+* ACMA Research and Analysis Section. (2015). *Australians get mobile*. Retrieved August 13, 2019, from Australian Communications and Media Authority website: https://www.acma.gov.au/theACMA/engage-blogs/engage-blogs/Research-snapshots/Australians-get-mobile
